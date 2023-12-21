@@ -3,9 +3,9 @@ import * as fs from 'fs';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { encrypt } from './crypto';
+import { config } from './config';
 
 const app = express();
-const port = 3000;
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -43,6 +43,6 @@ app.post('/writeToFile', (req: any, res: any) => {
   });
 });
 
-app.listen(port, () => {
-  console.log(`Server is listening at http://localhost:${port}`);
+app.listen(config.server.port, () => {
+  console.log(`Port is ${config.server.port}`);
 });
