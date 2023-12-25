@@ -14,8 +14,8 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(bodyParser.json({limit: '50mb'}));
-app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+app.use(bodyParser.json({limit: '300mb'}));
+app.use(bodyParser.urlencoded({limit: '300mb', extended: true}));
 
 app.post('/writeToFile', (req: any, res: any) => {
   const bodyData = req.body.data;
@@ -32,7 +32,7 @@ app.post('/writeToFile', (req: any, res: any) => {
     fs.mkdirSync(dir);
   }
 
-  fs.writeFile(`${dir}/data.txt`, encryptedData, (err) => {
+  fs.writeFile(`${dir}/data.txt`, JSON.stringify(bodyData, null, 2), (err) => {
     if (err) {
       console.error(err);
       res.status(500).send('Error writing to file');
