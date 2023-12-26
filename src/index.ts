@@ -32,6 +32,10 @@ app.get('/', async (req: any, res: any) => {
 
   let count = 0;
 
+  if (!filteredDirs.length) {
+    res.status(200).send([]);
+  }
+
   filteredDirs.forEach((folder) => {
     const folderPath = path.join(rootDir, folder);
 
