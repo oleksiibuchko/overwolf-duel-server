@@ -4,6 +4,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import { encrypt } from './crypto';
 import { config } from './config';
+import { readdirSync } from 'fs';
 
 const app = express();
 
@@ -13,9 +14,15 @@ const corsOptions = {
   optionSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
-app.use(express.json());
-app.use(bodyParser.json({limit: '300mb'}));
-app.use(bodyParser.urlencoded({limit: '300mb', extended: true}));
+app.use(bodyParser.json({ limit: '30mb' }));
+app.use(bodyParser.urlencoded({ limit: '30mb' , extended: true}));
+
+app.get('/', (req: any, res: any) => {
+    const dir = readdirSync('./', { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name);
+    res.status(200).send(dir);
+});
 
 app.post('/writeToFile', (req: any, res: any) => {
   const bodyData = req.body.data;
