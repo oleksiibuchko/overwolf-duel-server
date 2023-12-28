@@ -4,6 +4,12 @@ import axios from 'axios';
 
 const router = express.Router();
 
+router.get('/discord/login', (req, res) => {
+   const url = process.env.PORT ? 'https://discord.com/api/oauth2/authorize?client_id=1189626660190949467&response_type=code&redirect_uri=https%3A%2F%2Foverwolf-duel-api-207077dd4a09.herokuapp.com%2Fauth%2Fdiscord%2Fcallback&scope=identify'
+       : 'https://discord.com/api/oauth2/authorize?client_id=1189626660190949467&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fdiscord%2Fcallback&scope=identify'
+    res.status(200).json({ url });
+});
+
 router.get('/discord', async( req, res ) => {
 
     const code = req.query.code;
@@ -22,13 +28,13 @@ router.get('/discord', async( req, res ) => {
 
     try {
         const response = await axios.post('https://discord.com/api/oauth2/token', params, { headers });
+        console.log(response);
         const { access_token, token_type } = response.data;
         const userDataResponse = await axios.get('https://discord.com/api/users/@me',{
             headers: {
                 authorization: `${token_type} ${access_token}`
             }
         })
-        console.log('Data: ',userDataResponse.data)
         user = {
             username: userDataResponse.data.username,
             email: userDataResponse.data.email,
