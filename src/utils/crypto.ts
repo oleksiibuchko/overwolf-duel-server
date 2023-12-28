@@ -1,6 +1,8 @@
+import { config } from '../config';
+
 const crypto = require('crypto');
 const algorithm = 'aes-256-ctr';
-const ENCRYPTION_KEY = Buffer.from('FoCKvdLslUuB4y3EZlKate7XGottHski1LmyqJHvUhs=', 'base64');
+const ENCRYPTION_KEY = Buffer.from(config.crypto.encryptionKey, 'base64');
 const IV_LENGTH = 16;
 
 export function encrypt(text: string): string {
