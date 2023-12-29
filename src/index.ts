@@ -8,7 +8,7 @@ import { fileRouter } from './file/fileRouter';
 const app = express();
 
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: config.server.mode === 'prod' ? 'https://overwolf-duel-api-207077dd4a09.herokuapp.com' : 'http://localhost:3000',
   credentials: true,
   optionSuccessStatus: 200,
 };
