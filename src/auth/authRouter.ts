@@ -5,7 +5,7 @@ import axios from 'axios';
 const router = express.Router();
 
 router.get('/discord/login', (req, res) => {
-   const url = config.server.mode === 'prod' ? 'https://discord.com/api/oauth2/authorize?client_id=1189626660190949467&response_type=code&redirect_uri=https%3A%2F%2Foverwolf-duel-api-207077dd4a09.herokuapp.com%2Fauth%2Fdiscord%2Fcallback&scope=identifyidentify+connections'
+   const url = config.server.mode === 'prod' ? 'https://discord.com/api/oauth2/authorize?client_id=1189626660190949467&response_type=code&redirect_uri=https%3A%2F%2Foverwolf-duel-api-207077dd4a09.herokuapp.com%2Fauth%2Fdiscord%2Fcallback&scope=identify+connections'
        : 'https://discord.com/api/oauth2/authorize?client_id=1189626660190949467&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fdiscord%2Fcallback&scope=identify+connections'
     res.status(200).json({ url });
 });
