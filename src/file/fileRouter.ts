@@ -1,5 +1,5 @@
 import express from 'express';
-import { encrypt } from '../utils/crypto';
+import { decrypt, encrypt } from '../utils/crypto';
 import * as fs from 'fs';
 import path from 'path';
 import { readdirSync } from "fs";
@@ -44,7 +44,7 @@ router.get('/', async (req: any, res: any) => {
                         return;
                     }
 
-                    dataArray.push({ folder, data: JSON.parse(data) });
+                    dataArray.push({ folder, data: JSON.parse(decrypt(data)) });
                     count++;
 
                     if (count === filteredDirs.length) {
@@ -71,7 +71,7 @@ router.post('/writeToFile', (req: any, res: any) => {
         fs.mkdirSync(dir);
     }
 
-    fs.writeFile(`${dir}/data.txt`, JSON.stringify(bodyData, null, 2), (err) => {
+    fs.writeFile(`${dir}/data.txt`, encryptedData, (err) => {
         if (err) {
             console.error(err);
             res.status(500).send('Error writing to file');
