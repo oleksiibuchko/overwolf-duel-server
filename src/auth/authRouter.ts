@@ -68,7 +68,7 @@ router.get('/discord/callback', async( req, res ) => {
         const response = await axios.post('https://discord.com/api/oauth2/token', params, { headers });
         const { access_token, token_type } = response.data;
 
-        await axios.get(`http://localhost:61234?access_token=${access_token}&token_type=${token_type}`);
+        // await axios.get(`http://localhost:61234?access_token=${access_token}&token_type=${token_type}`);
         res.send(`
             <html>
               <head>
