@@ -43,6 +43,7 @@ router.get('/discord/user', async( req, res ) => {
 
     if (!user) {
         res.status(400).send('User not found');
+        return;
     }
     const { access_token, token_type } = user;
 

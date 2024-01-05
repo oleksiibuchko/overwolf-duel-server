@@ -6,72 +6,96 @@ import { readdirSync } from "fs";
 
 const router = express.Router();
 
-const directiveExceptions = [".heroku", ".npm", ".profile.d", "dist", "node_modules", "src", ".git", ".idea"];
 const rootDir = './';
 
 router.get('/', async (req: any, res: any) => {
-    const dataArray = [];
+    const sessionId = req.query.sessionId;
 
-    const dirs = readdirSync('./', { withFileTypes: true })
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name)
-        .filter(dirName => !directiveExceptions.includes(dirName));
-    const filteredDirs = dirs.filter(dirName => !directiveExceptions.includes(dirName));
-
-    let count = 0;
-
-    if (!filteredDirs.length) {
-        res.status(200).send([]);
+    if (!sessionId) {
+        res.status(401).send('Invalid session Id');
+        return;
     }
 
-    filteredDirs.forEach((folder) => {
-        const folderPath = path.join(rootDir, folder);
+    const dataArray = [];
+    const gamesDir = './games';
+    const userFoldersPath = path.join(gamesDir, sessionId);
 
-        fs.stat(folderPath, (statErr, stats) => {
-            if (statErr) {
-                console.error('Error reading file stats:', statErr);
-                res.status(500).send('Internal Server Error');
-                return;
-            }
+    try {
+        // Check if the user directory exists
+        if (!fs.existsSync(userFoldersPath) || !fs.statSync(userFoldersPath).isDirectory()) {
+            res.status(404).send('User directory not found');
+            return;
+        }
 
-            if (stats.isDirectory()) {
-                const filePath = path.join(folderPath, 'data.txt');
+        // Get user folders within the user directory
+        const userFolders = readdirSync(userFoldersPath, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name);
 
-                fs.readFile(filePath, 'utf8', (readErr, data) => {
-                    if (readErr) {
-                        console.error(`Error reading ${filePath}:`, readErr);
-                        res.status(500).send('Internal Server Error');
-                        return;
-                    }
+        let count = 0;
 
-                    dataArray.push({ folder, data: JSON.parse(decrypt(data)) });
-                    count++;
+        if (!userFolders.length) {
+            res.status(200).send([]);
+            return;
+        }
 
-                    if (count === filteredDirs.length) {
-                        res.status(200).send(dataArray);
-                    }
-                });
-            }
+        userFolders.forEach((folder) => {
+            const folderPath = path.join(userFoldersPath, folder);
+            const filePath = path.join(folderPath, 'data.txt');
+
+            fs.readFile(filePath, 'utf8', (readErr, data) => {
+                if (readErr) {
+                    console.error(`Error reading ${filePath}:`, readErr);
+                    res.status(500).send('Internal Server Error');
+                    return;
+                }
+
+                dataArray.push({ folder, data: JSON.parse(decrypt(data)) });
+                count++;
+
+                if (count === userFolders.length) {
+                    res.status(200).send(dataArray);
+                }
+            });
         });
-    });
+    } catch (error) {
+        console.error('Error retrieving user folders and data:', error);
+        res.status(500).send('Internal Server Error');
+    }
 });
 
 router.post('/writeToFile', (req: any, res: any) => {
     const bodyData = req.body.data;
-    if (!bodyData || !bodyData.events || !bodyData.info || !bodyData.fileName) {
+    const sessionId = req.body.sessionId;
+
+    if (!sessionId || !bodyData || !bodyData.events || !bodyData.info || !bodyData.fileName) {
         res.status(500).send('Invalid data');
         return;
     }
 
     const encryptedData = encrypt(JSON.stringify(bodyData, null, 2));
 
-    const dir = `./${bodyData.fileName}`;
+    const gamesDir = './games';
+    const sessionDir = path.join(gamesDir, sessionId);
+    const fileNameDir = path.join(sessionDir, bodyData.fileName);
 
-    if (!fs.existsSync(dir)){
-        fs.mkdirSync(dir);
+    // Ensure the base directory (./games) exists
+    if (!fs.existsSync(gamesDir)) {
+        fs.mkdirSync(gamesDir);
     }
 
-    fs.writeFile(`${dir}/data.txt`, encryptedData, (err) => {
+    // Create the session directory
+    if (!fs.existsSync(sessionDir)) {
+        fs.mkdirSync(sessionDir);
+    }
+
+    // Create the file name directory
+    if (!fs.existsSync(fileNameDir)) {
+        fs.mkdirSync(fileNameDir);
+    }
+
+    // Write data to file
+    fs.writeFile(path.join(fileNameDir, 'data.txt'), encryptedData, (err) => {
         if (err) {
             console.error(err);
             res.status(500).send('Error writing to file');
