@@ -61,6 +61,31 @@ router.get('/discord/user', async( req, res ) => {
     }
 });
 
+router.get('/discord/connections', async( req, res ) => {
+    const sessionId = req.query.sessionId;
+    const user = users[sessionId];
+
+    if (!user) {
+        res.status(400).send('Connections not found');
+        return;
+    }
+    const { access_token, token_type } = user;
+
+    try {
+        const response = await axios.get('https://discord.com/api/users/@me/connections',{
+            headers: {
+                authorization: `${token_type} ${access_token}`
+            }
+        });
+        console.log(response);
+        return res.json({ connections: response });
+
+    } catch (error) {
+        console.log('Error', error);
+        return res.send(error);
+    }
+});
+
 router.get('/discord/callback', async( req, res ) => {
 
     const code = req.query.code;
